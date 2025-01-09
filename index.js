@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
-import { getAllDepartments, getAllEmployees, getAllRoles, addDepartment, addEmployee, addRole, updateEmployeeRole, disconnectFromDatabase } from './functions/functions.js';
+import { getAllDepartments, getAllEmployees, getAllRoles, addDepartment, addEmployee, addRole, updateEmployeeRole, disconnectFromDatabase, connectToDatabase } from './functions/functions.js';
 
-function start() {
+export function start() { // This function starts the application.
     const userChoices = ['View All Departments', 'View All Roles', 'View All Employees', 'Add Department', 'Add Role', 'Add Employee', 'Update Employee Role', 'Exit']
     inquirer
         .prompt([{
@@ -11,7 +11,7 @@ function start() {
             choices: userChoices
         }])
         .then((response) => {
-            switch(response.choices) {
+            switch(response.choices) { // This switch case statement performs the respective function for what the user selects.
                 case 'View All Departments':
                     getAllDepartments();
                     break;
@@ -33,11 +33,13 @@ function start() {
                 case 'Update Employee Role':
                     updateEmployeeRole();
                     break;
-                case 'Exit':
-                    disconnectFromDatabase();
-                    this.exit = true;
+                case 'Exit': // If the user exits, the process exits and the client is disconnected from the database by calling disconnectFromDatabase.
+                    process.exit(0).then(()=> {
+                        disconnectFromDatabase();
+                    })
+                    break;
             }
         })
 }
-
-start();
+connectToDatabase(); // This calls the function to connect to the database.
+start(); // This calls the function to start the application.

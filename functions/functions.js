@@ -1,5 +1,6 @@
 import pkg from 'pg';
 const { Client } = pkg;
+import { start } from '../index.js';
 import inquirer from 'inquirer';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -12,16 +13,16 @@ const client = new Client({
     port: process.env.DB_PORT,
 });
 
-export function connectToDatabase() {
-    client.connect()
-        .then((response) => {
-            console.log('Connected to the database successfully!');
-        })
+export async function connectToDatabase() { //This function connects the client to the database, and is used in index.js before the application starts.
+    await client.connect()
+    .then((response) => {
+        console.log('Connected to the database successfully!');
+    })
         .catch((err) => {
             console.error('ERROR connecting to the database:', err.stack);
         })
 }
-export function disconnectFromDatabase() {
+export function disconnectFromDatabase() { // This function disconnects from the database, used in the index.js case when the user chooses to exit the application.
     client.end()
         .then((response) => {
             console.log('Disconnected from the database successfully!');
@@ -31,7 +32,7 @@ export function disconnectFromDatabase() {
         })
 }
 
-export function addDepartment() {
+export async function addDepartment() {// This function prompts the user for A department name, then inserts this information into the department table.
     inquirer
         .prompt([{
             type: 'input',
@@ -47,9 +48,12 @@ export function addDepartment() {
         })
         .catch((err) => {
             console.log('ERROR adding department:', err.stack);
+        })
+        .finally(() => {
+            start();
         });
     }
-export function addRole() {
+export async function addRole() {// This function prompts the user for the title of a role, salary, and which department it belongs to. Then this information is inserted into the role table.
     client.query('SELECT id, name FROM department')
         .then((res) => {
             const departments = res.rows;
@@ -86,13 +90,18 @@ export function addRole() {
         })
         .catch((err) => {
             console.log('ERROR adding role:', err.stack);
+        })
+        .finally(() => {
+            start();
         });
     }
-export function addEmployee() {
+export async function addEmployee() {// This function prompts the user for the first and last name of an employee, their role, and their manager if applicable. It then inserts this information into the employee table.
+    let managerChoices = [];
+    
     client.query('SELECT id, first_name, last_name, role_id, manager_id FROM employee')
         .then((response) => {
             const employees = response.rows;
-            const managerChoices = employees.map(emp => ({
+            managerChoices = employees.map(emp => ({
                 name: `${emp.first_name} ${emp.last_name}`,
                 value: emp.id
             }));
@@ -138,9 +147,12 @@ export function addEmployee() {
         })
         .catch((err) => {
             console.error('ERROR adding employee:', err.stack);
+        })
+        .finally(() => {        
+            start();
         });
-    };
-export function updateEmployeeRole() {
+}
+export async function updateEmployeeRole() {// This function prompts the user to choose an employee, then to choose their new role. The role replaces the employee's previous role in the employee table.
     let employeeChoices;
     
     client.query('SELECT id, first_name, last_name FROM employee')
@@ -184,9 +196,12 @@ export function updateEmployeeRole() {
     })
     .catch((err) => {
         console.error('ERROR updating employee role:', err.stack);
+    })
+    .finally(() => {
+        start();
     });
 }
-export function getAllRoles() {
+export async function getAllRoles() {// This function displays everything from the role table.
     client.query('SELECT * FROM role')
         .then((response) => {
             console.table(response.rows);
@@ -194,8 +209,11 @@ export function getAllRoles() {
         .catch((err) => {
             console.error('ERROR getting all roles:', err.stack);
         })
+        .finally(() => {            
+            start();
+        });
 }
-export function getAllDepartments() {
+export async function getAllDepartments() {// This function displays everything from the department table.
     client.query('SELECT * FROM department')
         .then((response) => {
             console.table(response.rows);
@@ -203,8 +221,11 @@ export function getAllDepartments() {
         .catch((err) => {
             console.error('ERROR getting all departments:', err.stack);
         })
+        .finally(() => {
+            start();
+        });
 }
-export function getAllEmployees() {
+export async function getAllEmployees() {// This function displays everything from the employees table.
     client.query('SELECT * FROM employee')
         .then((response) => {
             console.table(response.rows);
@@ -212,4 +233,7 @@ export function getAllEmployees() {
         .catch((err) => {
             console.error('ERROR getting all employees:', err.stack);
         })
+        .finally(() => {
+            start();
+        });
 }

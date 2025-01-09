@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "create-db": "psql -U postgres -d postgres -c \"DROP DATABASE IF EXISTS employee_tracker;\" && psql -U postgres -d postgres -c \"CREATE DATABASE employee_tracker;\"",
+    "schema": "psql -U postgres -d employee_tracker -f db/schema.sql",
+    "seed": "psql -U postgres -d employee_tracker -f db/seeds.sql"
   },
   "keywords": [],
   "author": "",
